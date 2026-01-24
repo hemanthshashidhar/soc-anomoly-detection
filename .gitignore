@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/live_alerts.json
+data/*.csv
