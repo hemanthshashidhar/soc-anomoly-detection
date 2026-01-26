@@ -39,6 +39,7 @@ identity_threat_ai_poc/
 ### Clone the Repository
 
 git clone https://github.com/YOUR_USERNAME/identity-threat-ai.git
+
 cd identity-threat-ai
 
 ## Create Virtual Environment
