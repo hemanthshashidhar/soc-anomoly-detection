@@ -19,27 +19,18 @@ An AI-powered identity threat detection system with real-time cyber attack monit
 
 ## Project Structure
 identity_threat_ai_poc/
-├── attacks/ # Attack parsing and real attack integration
-|
-├── alerts/ # Alert generation logic
-|
-├── dashboard/ # Streamlit SOC dashboard
-|
-├── intelligence/ # Attack classification and narrative engine
-|
-├── ml/ # Anomaly detection models
-|
-├── pipeline/ # Data ingestion and feature engineering
-|
-├── profiles/ # User behavioral profiling
-|
-├── data/ # Logs (ignored in Git)
-|
-├── realtime_monitor.py # Real-time AI attack monitor
-|
+├── attacks/                # Attack parsing and real attack integration
+├── alerts/                 # Alert generation logic
+├── dashboard/              # Streamlit SOC dashboard
+├── intelligence/           # Attack classification and narrative engine
+├── ml/                     # Anomaly detection models
+├── pipeline/               # Data ingestion and feature engineering
+├── profiles/               # User behavioral profiling
+├── data/                   # Logs (ignored in Git)
+├── realtime_monitor.py     # Real-time AI attack monitor
 ├── requirements.txt
-|
 └── README.md
+
 
 
 ## How to Run
