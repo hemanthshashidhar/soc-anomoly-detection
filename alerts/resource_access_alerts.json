@@ -1,0 +1,59 @@
+[
+  {
+    "time": "2026-02-03T22:55:57.604681",
+    "user": "root",
+    "file": "/secure_data",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T22:55:57.610277",
+    "user": "root",
+    "file": "/secure_data/hr.txt",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T22:55:57.614564",
+    "user": "root",
+    "file": "/secure_data",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T22:55:57.618405",
+    "user": "root",
+    "file": "/secure_data/hr.txt",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T22:55:57.628473",
+    "user": "root",
+    "file": "/secure_data/hr.txt",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T23:05:41.785490",
+    "user": "root",
+    "file": "/secure_data",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T23:05:41.790257",
+    "user": "root",
+    "file": "/secure_data/hr.txt",
+    "severity": "HIGH",
+    "type": "UNAUTHORIZED_RESOURCE_ACCESS"
+  },
+  {
+    "time": "2026-02-03T23:10:57.772881",
+    "user": "root",
+    "file": "/secure_data/hr.txt",
+    "action": "chmod",
+    "severity": "CRITICAL",
+    "type": "UNAUTHORIZED_PERMISSION_CHANGE"
+  }
+]

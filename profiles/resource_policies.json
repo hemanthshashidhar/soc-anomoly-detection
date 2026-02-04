@@ -1,0 +1,7 @@
+{
+  "hemanth": {
+    "allowed": [
+    "/secure_data/public.txt"
+    ]
+  }
+}
