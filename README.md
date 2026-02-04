@@ -56,3 +56,4 @@ streamlit run dashboard/app.py
 sudo python3 realtime_monitor.py
 
 
+# soc-detection
