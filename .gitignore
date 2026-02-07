@@ -1,6 +1,51 @@
-venv/
+# Python
 __pycache__/
-*.pyc
-.env
-data/live_alerts.json
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Data files
 data/*.csv
+data/*.json
+*.pkl
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Test files
+test_*.py
+debug_*.py
+*_test.py
+simulate_*.py
+
+# Temporary monitors
+combined_monitor.py
+improved_monitor.py
+simple_*.py
+unified_monitor.py
+watch_audit.py
+file_access_monitor.py
+trigger_file_alert.py
+test_alert_writer.py
+test_file_monitor.py

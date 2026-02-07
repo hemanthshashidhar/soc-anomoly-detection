@@ -37,13 +37,17 @@ class AlertEngine:
             reasons.append("Multiple failed login attempts before success")
             risk_score += 10
 
-        # Determine alert level
+        # Determine alert level based on risk score
         if risk_score >= 70:
             alert_level = "CRITICAL"
-        elif risk_score >= 50:
+        elif risk_score >= 40:
             alert_level = "HIGH"
-        elif risk_score >= 30:
+        elif risk_score >= 20:
             alert_level = "MEDIUM"
+        elif risk_score >= 10:
+            alert_level = "LOW"
+        else:
+            alert_level = None
 
         return {
             "user_id": row["user_id"],

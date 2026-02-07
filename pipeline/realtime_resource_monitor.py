@@ -52,11 +52,16 @@ def should_alert(key):
     return False
 
 def store_live_alert(alert):
-    with open(LIVE_ALERTS_FILE, "r+") as f:
-        data = json.load(f)
-        data.append(alert)
-        f.seek(0)
-        json.dump(data, f, indent=2)
+    try:
+        with open(LIVE_ALERTS_FILE, "r") as f:
+            data = json.load(f)
+    except:
+        data = []
+    
+    data.append(alert)
+    
+    with open(LIVE_ALERTS_FILE, "w") as f:
+        json.dump(data[-100:], f, indent=2)
 
 # ============================================================
 # REAL-TIME AUDIT LOG MONITOR
@@ -66,104 +71,90 @@ def monitor():
     print("[+] Monitoring /var/log/audit/audit.log")
     print("[+] Waiting for file access or permission changes...\n")
 
-    with open(AUDIT_LOG, "r") as log:
-        log.seek(0, 2)  # jump to end of file
-        event = {}
+    try:
+        with open(AUDIT_LOG, "r") as log:
+            log.seek(0, 2)  # jump to end of file
 
-        while True:
-            line = log.readline()
-            if not line:
-                time.sleep(0.1)
-                continue
-
-            # ---------------- FILE ACCESS ----------------
-            if "type=SYSCALL" in line and "resource_access" in line:
-                event = {"kind": "RESOURCE"}
-                for p in line.split():
-                    if p.startswith("uid="):
-                        event["uid"] = p.split("=")[1]
-
-            elif "type=PATH" in line and event.get("kind") == "RESOURCE":
-                filepath = None
-                for p in line.split():
-                    if p.startswith("name="):
-                        filepath = p.replace("name=", "").strip('"')
-
-                if not filepath:
-                    event = {}
+            while True:
+                line = log.readline()
+                if not line:
+                    time.sleep(0.1)
                     continue
 
-                user = uid_to_user(event.get("uid"))
-                if not user:
-                    event = {}
-                    continue
-
-                if not is_allowed(user, filepath):
-                    key = f"RESOURCE:{user}:{filepath}"
-                    if should_alert(key):
-                        alert = {
-                            "timestamp": datetime.now().isoformat(),
-                            "user_id": user,
-                            "attack_type": "UNAUTHORIZED_RESOURCE_ACCESS",
-                            "alert_level": "HIGH",
-                            "resource": filepath,
-                            "risk_score": 0.80,
-                            "active_attack": True,
-                            "source": "auditd"
-                        }
-
-                        store_live_alert(alert)
-
-                        print("🚨 UNAUTHORIZED RESOURCE ACCESS")
-                        print(alert)
-                        print("-" * 60)
-
-                event = {}
-
-            # ---------------- PERMISSION CHANGE ----------------
-            if "type=SYSCALL" in line and "permission_change" in line:
-                event = {"kind": "PERMISSION"}
-                for p in line.split():
-                    if p.startswith("uid="):
-                        event["uid"] = p.split("=")[1]
-                    if p.startswith("comm="):
-                        event["cmd"] = p.replace("comm=", "").strip('"')
-
-            elif "type=PATH" in line and event.get("kind") == "PERMISSION":
-                filepath = None
-                for p in line.split():
-                    if p.startswith("name="):
-                        filepath = p.replace("name=", "").strip('"')
-
-                if not filepath:
-                    event = {}
-                    continue
-
-                user = uid_to_user(event.get("uid"))
-                if not user:
-                    event = {}
-                    continue
-
-                key = f"PERMISSION:{user}:{filepath}"
-                if should_alert(key):
-                    alert = {
-                        "timestamp": datetime.now().isoformat(),
-                        "user_id": user,
-                        "attack_type": "UNAUTHORIZED_PERMISSION_CHANGE",
-                        "alert_level": "CRITICAL",
-                        "resource": filepath,
-                        "risk_score": 0.95,
-                        "active_attack": True,
-                        "source": "auditd"
-                    }
-
-                    store_live_alert(alert)
-
-                    print("🔥 UNAUTHORIZED PERMISSION CHANGE")
-                    print(alert)
-                    print("-" * 60)
-
-                event = {}
+                # Look for SYSCALL entries with our audit keys
+                if "type=SYSCALL" in line and ("key=\"resource_access\"" in line or "key=\"permission_change\"" in line):
+                    # Extract UID
+                    uid = None
+                    for part in line.split():
+                        if part.startswith("uid="):
+                            uid = part.split("=")[1]
+                            break
+                    
+                    if not uid:
+                        continue
+                    
+                    # Read next line to get PATH with filename
+                    path_line = log.readline()
+                    if "type=PATH" not in path_line:
+                        continue
+                    
+                    # Extract filepath from PATH line
+                    filepath = None
+                    for part in path_line.split():
+                        if part.startswith("name="):
+                            filepath = part.split("=")[1].strip('"')
+                            break
+                    
+                    if not filepath or "/secure_data" not in filepath:
+                        continue
+                    
+                    user = uid_to_user(uid) or f"uid_{uid}"
+                    
+                    # Determine if it's access or permission change
+                    is_permission_change = "key=\"permission_change\"" in line
+                    
+                    # Check if access is allowed
+                    if not is_allowed(user, filepath):
+                        key = f"{'PERMISSION' if is_permission_change else 'RESOURCE'}:{user}:{filepath}"
+                        if should_alert(key):
+                            if is_permission_change:
+                                alert = {
+                                    "timestamp": datetime.now().isoformat(),
+                                    "user_id": user,
+                                    "attack_type": "UNAUTHORIZED_PERMISSION_CHANGE",
+                                    "alert_level": "CRITICAL",
+                                    "resource": filepath,
+                                    "risk_score": 0.95,
+                                    "active_attack": True,
+                                    "source": "auditd",
+                                    "reasons": [f"Unauthorized permission change on {filepath}", "Critical security policy violation"],
+                                    "narrative": f"CRITICAL SECURITY ALERT: User '{user}' made unauthorized permission changes to '{filepath}'. This is a severe security violation that could indicate privilege escalation or system compromise."
+                                }
+                                print("🔥 UNAUTHORIZED PERMISSION CHANGE")
+                            else:
+                                alert = {
+                                    "timestamp": datetime.now().isoformat(),
+                                    "user_id": user,
+                                    "attack_type": "UNAUTHORIZED_RESOURCE_ACCESS",
+                                    "alert_level": "HIGH",
+                                    "resource": filepath,
+                                    "risk_score": 0.80,
+                                    "active_attack": True,
+                                    "source": "auditd",
+                                    "reasons": [f"Unauthorized access to {filepath}", "Resource access policy violation"],
+                                    "narrative": f"Security violation: User '{user}' attempted unauthorized access to protected resource '{filepath}'. This violates the established resource access policies and may indicate malicious activity."
+                                }
+                                print("🚨 UNAUTHORIZED RESOURCE ACCESS")
+                            
+                            store_live_alert(alert)
+                            print(f"User: {user}")
+                            print(f"File: {filepath}")
+                            print("-" * 60)
+                                
+    except FileNotFoundError:
+        print("❌ Audit log not found. Make sure auditd is running and you have permissions.")
+    except PermissionError:
+        print("❌ Permission denied. Run with sudo to access audit logs.")
 
 # ============================================================
 # ENTRY POINT

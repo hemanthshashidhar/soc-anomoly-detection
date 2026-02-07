@@ -34,6 +34,7 @@ for line in process.stdout:
         alert["timestamp"] = datetime.now().isoformat()
         alert["user"] = user
         alert["ip"] = ip
+        alert["source"] = "ssh"  # CRITICAL: Add source field
 
         try:
             with open(LIVE_ALERTS_FILE, "r") as f:
